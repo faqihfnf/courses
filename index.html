@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="id">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Course — Faqih Nur Fahmi</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,600&display=swap"
+    rel="stylesheet">
+
+  <!-- Sidebar dan bilah atas dipinjam dari slides.faqih.id supaya tampilan
+       kedua situs selalu sama. Ubahnya di repo slides, folder shared/. -->
+  <link rel="stylesheet" href="https://faqih.id/brand.css">
+  <link rel="stylesheet" href="https://slides.faqih.id/shared/chrome.css">
+  <link rel="stylesheet" href="style.css">
+
+  <script defer src="https://slides.faqih.id/shared/chrome.js"></script>
+  <script defer src="data.js"></script>
+  <script defer src="app.js"></script>
+</head>
+
+<body>
+
+  <div class="shell">
+
+    <!-- Sidebar dan bilah atas diisi renderShell() dari shared/chrome.js -->
+    <nav id="fnf-sidebar"></nav>
+
+    <div class="main">
+      <div id="fnf-header"></div>
+
+      <!-- Isi course / webinar dirender app.js sesuai hash -->
+      <div class="page" id="page"></div>
+    </div>
+
+  </div>
+
+</body>
+
+</html>

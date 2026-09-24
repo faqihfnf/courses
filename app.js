@@ -244,6 +244,7 @@
   }
 
   renderShell({
+    site: "courses",
     tagline: "Kumpulan Course & Sharing",
     sidebarLabel: "Daftar course",
     searchPlaceholder: "Cari course atau webinar",

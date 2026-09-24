@@ -56,6 +56,44 @@
   /* Embed YouTube. Pakai youtube-nocookie (tanpa cookie pelacak sebelum
      diputar) dan referrerpolicy bawaan YouTube — tanpa referrer, player-nya
      menolak diputar di situs lain. */
+  function player(youtubeId, title) {
+    const params = new URLSearchParams({
+      autoplay: "1", // dimuat karena diklik, jadi langsung putar
+      rel: "0", // video terkait di akhir cuma dari channel yang sama
+      iv_load_policy: "3", // sembunyikan anotasi
+      playsinline: "1", // iPhone: putar di halaman, bukan layar penuh
+    });
+    return el("iframe", {
+      src: `https://www.youtube-nocookie.com/embed/${encodeURIComponent(youtubeId)}?${params}`,
+      title,
+      allow: "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
+      referrerpolicy: "strict-origin-when-cross-origin",
+      allowfullscreen: true,
+    });
+  }
+
+  /* Sebelum diputar, tampilkan thumbnail + tombol play sendiri, bukan player
+     YouTube. Player bawaan selalu memajang judul, nama channel, dan avatar
+     (parameter showinfo/modestbranding untuk menyembunyikannya sudah
+     dihapus YouTube). Iframe baru dimuat setelah diklik — sekalian membuat
+     halaman lebih ringan. Saat video dijeda, YouTube tetap bisa memunculkan
+     judulnya sebentar; itu di luar kendali kita. */
+  function poster(youtubeId, title) {
+    const base = `https://i.ytimg.com/vi/${encodeURIComponent(youtubeId)}`;
+    const img = el("img", { src: `${base}/maxresdefault.jpg`, alt: "" });
+    // Video lama/beresolusi rendah tidak punya maxresdefault; YouTube lalu
+    // mengirim gambar abu-abu 120x90. Turunkan ke hqdefault.
+    img.addEventListener("load", () => {
+      if (img.naturalWidth <= 120) img.src = `${base}/hqdefault.jpg`;
+    });
+    img.addEventListener("error", () => (img.src = `${base}/hqdefault.jpg`), { once: true });
+
+    const button = el("button", { class: "video-poster", type: "button", "aria-label": `Putar video: ${title}` }, img, el("span", { class: "video-play", html: ICON_PLAY }));
+    const box = el("div", { class: "video" }, button);
+    button.addEventListener("click", () => box.replaceChildren(player(youtubeId, title)));
+    return box;
+  }
+
   function video(youtubeId, title) {
     if (!youtubeId) {
       return el("div", { class: "video video-empty" }, el("div", { html: ICON_VIDEO }), el("p", {}, "Video belum tersedia."));
@@ -71,17 +109,7 @@
         el("p", {}, "Buka lewat server lokal (misalnya Live Server) atau situs yang sudah online."),
       );
     }
-    return el(
-      "div",
-      { class: "video" },
-      el("iframe", {
-        src: `https://www.youtube-nocookie.com/embed/${encodeURIComponent(youtubeId)}?rel=0`,
-        title,
-        allow: "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
-        referrerpolicy: "strict-origin-when-cross-origin",
-        allowfullscreen: true,
-      }),
-    );
+    return poster(youtubeId, title);
   }
 
   /* Panel kanan: semua sesi + lesson, lesson yang sedang dibuka disorot */
@@ -131,10 +159,15 @@
       el(
         "div",
         { class: "lesson-body" },
-        el("div", { class: "lesson-head" }, el("h1", {}, lesson.title)),
+        el(
+          "div",
+          { class: "lesson-head" },
+          el("h1", {}, lesson.title),
+          // Lesson terakhir: tidak ada tombol Lanjut. Judul lesson berikutnya
+          // ikut di title supaya tetap terbaca saat kursor diarahkan.
+          next && el("a", { class: "btn btn-next", href: `#${course.slug}/${next.slug}`, title: `Berikutnya: ${next.title}` }, "Lanjut", el("span", { html: ICON_NEXT })),
+        ),
         video(lesson.youtubeId, lesson.title),
-        // Lesson terakhir: tidak ada tombol Lanjut
-        next && el("div", { class: "next" }, el("span", {}, "Berikutnya: ", el("strong", {}, next.title)), el("a", { class: "btn btn-next", href: `#${course.slug}/${next.slug}` }, "Lanjut", el("span", { html: ICON_NEXT }))),
       ),
     );
 

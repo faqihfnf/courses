@@ -48,9 +48,9 @@ const CONTENT = [
   },
   {
     type: "webinar",
-    slug: "update-uu-2026",
-    title: "Update UU Ketenagakerjaan 2026",
-    description: "Rekaman sharing tentang perubahan Undang-Undang Ketenagakerjaan 2026 dan dampaknya pada kebijakan HR.",
-    youtubeId: "",
+    slug: "basic-payroll-process",
+    title: "Basic Payroll Process",
+    description: "Rekaman sharing tentang siklus payroll dari absen sampai gaji.",
+    youtubeId: "jkXrvXnojZI",
   },
 ];

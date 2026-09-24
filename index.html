@@ -12,13 +12,27 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,600&display=swap"
     rel="stylesheet">
 
-  <!-- Sidebar dan bilah atas dipinjam dari slides.faqih.id supaya tampilan
-       kedua situs selalu sama. Ubahnya di repo slides, folder shared/. -->
   <link rel="stylesheet" href="https://faqih.id/brand.css">
-  <link rel="stylesheet" href="https://slides.faqih.id/shared/chrome.css">
+
+  <!-- Sidebar dan bilah atas dipinjam dari slides.faqih.id supaya tampilan
+       kedua situs selalu sama. Ubahnya di repo slides, folder shared/.
+       Saat dibuka dari komputer sendiri (Live Server di localhost /
+       127.0.0.1), dipakai salinan lokal ../slides/shared/ supaya perubahan
+       chrome bisa dicoba sebelum di-push. Syaratnya Live Server dijalankan
+       dari folder induk yang berisi slides/ dan courses/. -->
+  <script>
+    (() => {
+      const local = ["localhost", "127.0.0.1"].includes(location.hostname);
+      const base = local ? "../slides/shared/" : "https://slides.faqih.id/shared/";
+      document.write(
+        `<link rel="stylesheet" href="${base}chrome.css">` +
+        `<script defer src="${base}chrome.js"><\/script>`
+      );
+    })();
+  </script>
+
   <link rel="stylesheet" href="style.css">
 
-  <script defer src="https://slides.faqih.id/shared/chrome.js"></script>
   <script defer src="data.js"></script>
   <script defer src="app.js"></script>
 </head>

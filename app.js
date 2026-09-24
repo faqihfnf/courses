@@ -9,9 +9,20 @@
 (() => {
   const page = document.getElementById("page");
 
-  const GROUPS = [
-    { type: "course", label: "Course" },
-    { type: "webinar", label: "Webinar" },
+  // Tab di sidebar, satu per type. Isi tiap tab dikelompokkan per category.
+  const TABS = [
+    {
+      type: "course",
+      label: "Course",
+      // buku terbuka
+      icon: '<path d="M12 6.5C10.5 5.3 8.3 4.5 5.5 4.5H3v13h2.5c2.8 0 5 .8 6.5 2m0-13c1.5-1.2 3.7-2 6.5-2H21v13h-2.5c-2.8 0-5 .8-6.5 2m0-13v13" stroke-linecap="round" stroke-linejoin="round"/>',
+    },
+    {
+      type: "webinar",
+      label: "Webinar",
+      // layar dengan tombol putar
+      icon: '<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4M10.5 8.5v5l4-2.5z" stroke-linecap="round" stroke-linejoin="round"/>',
+    },
   ];
 
   const ICON_PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z" stroke-linejoin="round"/></svg>';
@@ -39,16 +50,34 @@
 
   /* --- Sidebar ------------------------------------------------------------ */
 
-  function groupsFor(activeSlug) {
-    return GROUPS.map(({ type, label }) => ({
-      label,
-      items: CONTENT.filter((item) => item.type === type).map((item) => ({
+  /* Kelompok per category; urutan kelompok mengikuti kemunculan pertamanya
+     di data.js. Tanpa category masuk "Lainnya". */
+  function categoriesOf(items, activeSlug) {
+    const groups = new Map();
+    items.forEach((item) => {
+      const label = item.category || "Lainnya";
+      if (!groups.has(label)) groups.set(label, []);
+      groups.get(label).push({
         title: item.title,
         subtitle: subtitleOf(item),
         href: `#${item.slug}`,
         active: item.slug === activeSlug,
-      })),
-    })).filter((group) => group.items.length);
+      });
+    });
+    return [...groups].map(([label, items]) => ({ label, items }));
+  }
+
+  /* Tab tanpa isi tidak ditampilkan */
+  function tabsFor(activeSlug) {
+    return TABS.map(({ type, label, icon }) => ({
+      id: type,
+      label,
+      icon,
+      groups: categoriesOf(
+        CONTENT.filter((item) => item.type === type),
+        activeSlug,
+      ),
+    })).filter((tab) => tab.groups.length);
   }
 
   /* --- Potongan halaman --------------------------------------------------- */
@@ -207,7 +236,7 @@
     const canonical = known ? `#${item.slug}/${lesson.slug}` : `#${item.slug}`;
     if (location.hash !== canonical) history.replaceState(null, "", canonical);
 
-    renderShell({ groups: groupsFor(item.slug), headerTitle: item.title });
+    renderShell({ tabs: tabsFor(item.slug), headerTitle: item.title });
 
     if (item.type === "course") renderCourse(item, lesson);
     else renderWebinar(item);
@@ -218,8 +247,8 @@
     tagline: "Kumpulan Course & Sharing",
     sidebarLabel: "Daftar course",
     searchPlaceholder: "Cari course atau webinar",
-    emptyText: "Tidak ada course atau webinar yang cocok dengan pencarian itu.",
-    groups: groupsFor(null),
+    emptyText: "Tidak ada yang cocok di tab ini.",
+    tabs: tabsFor(null),
     headerTitle: "Pilih course",
     showSlideshow: false,
   });

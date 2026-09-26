@@ -1,13 +1,20 @@
-/* Perekat: membaca alamat (hash), memilih course/webinar dari data.js, lalu
-   merender sidebar + bilah atas (lewat renderShell) dan isi halaman.
+/* Perekat: memuat courses.json + webinars.json, membaca alamat (hash),
+   memilih course/webinar, lalu merender sidebar + bilah atas (lewat
+   renderShell) dan isi halaman. Kedua file JSON diedit lewat Pages CMS
+   (lihat .pages.yml).
 
    Alamat:
      #slug                 course → lesson pertama; webinar → videonya
      #slug/slug-lesson     lesson tertentu di dalam course
-   Alamat kosong atau tidak dikenal jatuh ke isi pertama di data.js. */
+   Alamat kosong atau tidak dikenal jatuh ke course pertama. */
 
-(() => {
+(async () => {
   const page = document.getElementById("page");
+  const EMPTY_TEXT = "Tidak ada yang cocok di tab ini.";
+
+  // Diisi dari JSON di bawah: course dulu, lalu webinar, masing-masing diberi
+  // type supaya kode lain cukup melihat satu daftar.
+  let CONTENT = [];
 
   // Tab di sidebar, satu per type. Isi tiap tab dikelompokkan per category.
   const TABS = [
@@ -30,7 +37,7 @@
   const ICON_VIDEO = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9.5v5l4.5-2.5z" stroke-linejoin="round"/></svg>';
 
   /* Buat elemen: el("a", { href: "#x", class: "y" }, "teks", anakLain).
-     Teks selalu lewat textContent, jadi judul dari data.js aman. */
+     Teks selalu lewat textContent, jadi judul dari JSON aman. */
   function el(tag, attrs = {}, ...children) {
     const node = document.createElement(tag);
     Object.entries(attrs).forEach(([key, value]) => {
@@ -51,7 +58,7 @@
   /* --- Sidebar ------------------------------------------------------------ */
 
   /* Kelompok per category; urutan kelompok mengikuti kemunculan pertamanya
-     di data.js. Tanpa category masuk "Lainnya". */
+     di JSON. Tanpa category masuk "Lainnya". */
   function categoriesOf(items, activeSlug) {
     const groups = new Map();
     items.forEach((item) => {
@@ -243,16 +250,61 @@
     page.scrollTop = 0;
   }
 
+  /* --- Memuat data ------------------------------------------------------- */
+
+  // no-cache: GitHub Pages menyimpan cache 10 menit; ini memaksa browser
+  // bertanya dulu (murah, lewat ETag) supaya perubahan dari Pages CMS
+  // langsung terlihat begitu situs selesai di-deploy.
+  async function load(path) {
+    const res = await fetch(path, { cache: "no-cache" });
+    if (!res.ok) throw new Error(`${path}: HTTP ${res.status}`);
+    return res.json();
+  }
+
+  /* Form Pages CMS bisa menyimpan course yang belum lengkap (sesi/lesson
+     kosong). Daftar kosong dirapikan jadi [], dan course yang belum punya
+     lesson sama sekali tidak ditampilkan dulu. */
+  function toCourse(course) {
+    const sessions = (course.sessions || []).map((session) => ({ ...session, lessons: session.lessons || [] }));
+    return { ...course, type: "course", sessions };
+  }
+
+  function showError() {
+    const text =
+      location.protocol === "file:"
+        ? ["Daftar course tidak bisa dimuat dari file lokal.", "Buka lewat server lokal (misalnya Live Server) atau situs yang sudah online."]
+        : ["Gagal memuat daftar course.", "Coba muat ulang halaman."];
+    page.className = "page page-webinar";
+    page.replaceChildren(
+      el("article", { class: "lesson" }, el("div", { class: "lesson-body" }, el("div", { class: "video video-empty", role: "alert" }, el("div", { html: ICON_VIDEO }), ...text.map((line) => el("p", {}, line))))),
+    );
+  }
+
   renderShell({
     site: "courses",
     tagline: "Kumpulan Course & Sharing",
     sidebarLabel: "Daftar course",
     searchPlaceholder: "Cari course atau webinar",
-    emptyText: "Tidak ada yang cocok di tab ini.",
-    tabs: tabsFor(null),
-    headerTitle: "Pilih course",
+    emptyText: "Memuat…",
+    tabs: [],
+    headerTitle: "Memuat…",
     showSlideshow: false,
   });
+
+  try {
+    const [courses, webinars] = await Promise.all([load("courses.json"), load("webinars.json")]);
+    CONTENT = [
+      ...courses.map(toCourse).filter((course) => lessonsOf(course).length),
+      ...webinars.map((webinar) => ({ ...webinar, type: "webinar" })),
+    ];
+  } catch (err) {
+    console.error("Gagal memuat data course:", err);
+    renderShell({ emptyText: "Gagal memuat daftar course.", headerTitle: "Gagal memuat" });
+    showError();
+    return;
+  }
+
+  renderShell({ emptyText: EMPTY_TEXT, tabs: tabsFor(null), headerTitle: "Pilih course" });
 
   addEventListener("hashchange", route);
   route();

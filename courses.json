@@ -1,0 +1,23 @@
+[
+  {
+    "category": "HR",
+    "slug": "dasar-payroll",
+    "title": "Dasar-Dasar Payroll",
+    "sessions": [
+      {
+        "title": "Pengantar Payroll",
+        "lessons": [
+          { "slug": "apa-itu-payroll", "title": "Apa itu Payroll?", "youtubeId": "" },
+          { "slug": "komponen-gaji", "title": "Komponen Gaji", "youtubeId": "" }
+        ]
+      },
+      {
+        "title": "Perhitungan Pajak",
+        "lessons": [
+          { "slug": "pph-21-dasar", "title": "PPh 21 Dasar", "youtubeId": "" },
+          { "slug": "studi-kasus", "title": "Studi Kasus", "youtubeId": "" }
+        ]
+      }
+    ]
+  }
+]

@@ -1,0 +1,103 @@
+# Form editor Pages CMS (app.pagescms.org) untuk courses.json dan
+# webinars.json. Masing-masing jadi satu tab di sidebar situs ("Course" dan
+# "Webinar"). Di dalam tab, isi dikelompokkan per category; urutan di daftar =
+# urutan di sidebar, urutan kelompok mengikuti kemunculan pertama category-nya.
+#
+# Slug course dan webinar dipakai di alamat (course.faqih.id/#slug) dan harus
+# unik di KEDUA daftar sekaligus.
+
+content:
+  - name: courses
+    label: Courses
+    type: file
+    path: courses.json
+    format: json
+    list: true
+    fields:
+      - name: category
+        label: Kategori
+        type: string
+        description: Kelompok di sidebar, contoh "HR" atau "Data". Kalau dikosongkan, masuk kelompok "Lainnya".
+      - name: slug
+        label: Slug
+        type: string
+        required: true
+        description: Dipakai di alamat, contoh course.faqih.id/#dasar-payroll. Harus unik di seluruh course maupun webinar.
+        pattern:
+          regex: "^[a-z0-9]+(-[a-z0-9]+)*$"
+          message: Huruf kecil, angka, dan tanda minus saja, contoh dasar-payroll
+      - name: title
+        label: Judul
+        type: string
+        required: true
+        description: Judul di sidebar, halaman, dan bilah atas.
+      - name: sessions
+        label: Sesi
+        type: object
+        list: true
+        description: Tombol "Lanjut" mengikuti urutan lesson di sini, menyeberang antar sesi.
+        fields:
+          - name: title
+            label: Judul sesi
+            type: string
+            required: true
+          - name: lessons
+            label: Lesson
+            type: object
+            list: true
+            fields:
+              - name: slug
+                label: Slug
+                type: string
+                required: true
+                description: Cukup unik di dalam course ini; alamatnya jadi #slug-course/slug-lesson.
+                pattern:
+                  regex: "^[a-z0-9]+(-[a-z0-9]+)*$"
+                  message: Huruf kecil, angka, dan tanda minus saja, contoh komponen-gaji
+              - name: title
+                label: Judul
+                type: string
+                required: true
+              - name: youtubeId
+                label: YouTube ID
+                type: string
+                description: >-
+                  Bagian setelah "v=" di alamat YouTube (youtube.com/watch?v=INI_ID_NYA)
+                  atau ujung alamat pendek youtu.be/INI_ID_NYA. Video boleh unlisted.
+                  Kalau dikosongkan, halaman menampilkan "Video belum tersedia".
+
+  - name: webinars
+    label: Webinars
+    type: file
+    path: webinars.json
+    format: json
+    list: true
+    fields:
+      - name: category
+        label: Kategori
+        type: string
+        description: Kelompok di sidebar, contoh "HR" atau "Data". Kalau dikosongkan, masuk kelompok "Lainnya".
+      - name: slug
+        label: Slug
+        type: string
+        required: true
+        description: Dipakai di alamat, contoh course.faqih.id/#basic-payroll-process. Harus unik di seluruh course maupun webinar.
+        pattern:
+          regex: "^[a-z0-9]+(-[a-z0-9]+)*$"
+          message: Huruf kecil, angka, dan tanda minus saja, contoh basic-payroll-process
+      - name: title
+        label: Judul
+        type: string
+        required: true
+        description: Judul di sidebar, halaman, dan bilah atas.
+      - name: description
+        label: Keterangan
+        type: text
+        description: Keterangan singkat di bawah video, boleh dikosongkan.
+      - name: youtubeId
+        label: YouTube ID
+        type: string
+        description: >-
+          Bagian setelah "v=" di alamat YouTube (youtube.com/watch?v=INI_ID_NYA)
+          atau ujung alamat pendek youtu.be/INI_ID_NYA. Video boleh unlisted.
+          Kalau dikosongkan, halaman menampilkan "Video belum tersedia".
